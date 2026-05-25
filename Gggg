@@ -1,1 +1,341 @@
+-- [[ VORTEX ADMIN - 50 REPOSITORY COMMANDS MODULE ]] --
+-- Paste this completely inside your GitHub file: aguinidgerald-cell/Ggggg/blob/main/Gggg
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+local RepoCommands = {}
+
+-- UTILITY FUNCTIONS FOR TARGETING
+local function GetPlayer(target)
+    if not target or target == "me" then return {LocalPlayer} end
+    if target == "all" then return Players:GetPlayers() end
+    if target == "others" then
+        local t = {}
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer then table.insert(t, p) end
+        end
+        return t
+    end
+    local found = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p.Name:lower():sub(1, #target) == target:lower() then table.insert(found, p) end
+    end
+    return found
+end
+
+-- =======================================================
+-- [[ THE 50 COMMANDS DATABASE ]]
+-- =======================================================
+
+-- 1. WalkSpeed (ws)
+RepoCommands["ws"] = function(args)
+    local amt = tonumber(args[2]) or 16
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then p.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = amt end end
+end
+
+-- 2. JumpPower (jp)
+RepoCommands["jp"] = function(args)
+    local amt = tonumber(args[2]) or 50
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then p.Character:FindFirstChildOfClass("Humanoid").JumpPower = amt end end
+end
+
+-- 3. HipHeight (hh)
+RepoCommands["hh"] = function(args)
+    local amt = tonumber(args[2]) or 0
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then p.Character:FindFirstChildOfClass("Humanoid").HipHeight = amt end end
+end
+
+-- 4. Gravity (grav)
+RepoCommands["grav"] = function(args) Workspace.Gravity = tonumber(args[1]) or 196.2 end
+
+-- 5. Sit
+RepoCommands["sit"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then p.Character:FindFirstChildOfClass("Humanoid").Sit = true end end
+end
+
+-- 6. Unsit
+RepoCommands["unsit"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then p.Character:FindFirstChildOfClass("Humanoid").Sit = false end end
+end
+
+-- 7. Nofog
+RepoCommands["nofog"] = function() Lighting.FogEnd = 999999; Lighting.FogStart = 999999 end
+
+-- 8. Day
+RepoCommands["day"] = function() Lighting.ClockTime = 14 end
+
+-- 9. Night
+RepoCommands["night"] = function() Lighting.ClockTime = 0 end
+
+-- 10. Bring (Teleport Target to Me - Client Side)
+RepoCommands["bring"] = function(args)
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if myRoot then
+        for _, p in pairs(GetPlayer(args[1])) do
+            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.CFrame = myRoot.CFrame + Vector3.new(0, 0, -3) end
+        end
+    end
+end
+
+-- 11. Goto (Teleport Me to Target)
+RepoCommands["goto"] = function(args)
+    local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local targets = GetPlayer(args[1])
+    if myRoot and #targets > 0 and targets[1].Character and targets[1].Character:FindFirstChild("HumanoidRootPart") then
+        myRoot.CFrame = targets[1].Character.HumanoidRootPart.CFrame + Vector3.new(0, 0, 3)
+    end
+end
+
+-- 12. Freeze
+RepoCommands["freeze"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.Anchored = true end end
+end
+
+-- 13. Thaw (Unfreeze)
+RepoCommands["thaw"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.Anchored = false end end
+end
+
+-- 14. BigHeads (Hitbox Expansion V1)
+RepoCommands["bigheads"] = function(args)
+    local size = tonumber(args[2]) or 4
+    for _, p in pairs(GetPlayer(args[1] or "others")) do
+        if p.Character and p.Character:FindFirstChild("Head") then p.Character.Head.Size = Vector3.new(size, size, size); p.Character.Head.CanCollide = false end
+    end
+end
+
+-- 15. NormalHeads
+RepoCommands["normalheads"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChild("Head") then p.Character.Head.Size = Vector3.new(1.2, 1.2, 1.2) end end
+end
+
+-- 16. Kill (Client Side Despawn)
+RepoCommands["kill"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then p.Character:FindFirstChildOfClass("Humanoid").Health = 0 end end
+end
+
+-- 17. GodMode (Client Side Immunity Test)
+RepoCommands["godmode"] = function()
+    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if hum then hum.MaxHealth = math.huge; hum.Health = math.huge end
+end
+
+-- 18. Ungodmode
+RepoCommands["ungodmode"] = function()
+    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if hum then hum.MaxHealth = 100; hum.Health = 100 end
+end
+
+-- 19. FullBright (Light Overdrive)
+RepoCommands["fullbright"] = function() Lighting.Ambient = Color3.fromRGB(255, 255, 255); Lighting.Brightness = 3 end
+
+-- 20. NoClip
+RepoCommands["noclip"] = function()
+    _G.NoClipLoop = RunService.Stepped:Connect(function()
+        if LocalPlayer.Character then
+            for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
+        end
+    end)
+end
+
+-- 21. Clip
+RepoCommands["clip"] = function() if _G.NoClipLoop then _G.NoClipLoop:Disconnect() end end
+
+-- 22. InfJump
+RepoCommands["infjump"] = function()
+    _G.InfJumpConn = game:GetService("UserInputService").JumpRequest:Connect(function()
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum:ChangeState("Jumping") end
+    end)
+end
+
+-- 23. Uninfjump
+RepoCommands["uninfjump"] = function() if _G.InfJumpConn then _G.InfJumpConn:Disconnect() end end
+
+-- 24. Spin
+RepoCommands["spin"] = function(args)
+    local speed = tonumber(args[2]) or 40
+    for _, p in pairs(GetPlayer(args[1])) do
+        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local bg = Instance.new("BodyAngularVelocity", p.Character.HumanoidRootPart)
+            bg.Name = "VortexSpin"
+            bg.AngularVelocity = Vector3.new(0, speed, 0)
+            bg.MaxTorque = Vector3.new(0, math.huge, 0)
+        end
+    end
+end
+
+-- 25. Unspin
+RepoCommands["unspin"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do
+        if p.Character and p.Character.HumanoidRootPart:FindFirstChild("VortexSpin") then p.Character.HumanoidRootPart.VortexSpin:Destroy() end
+    end
+end
+
+-- 26. Invisible
+RepoCommands["invisible"] = function()
+    if LocalPlayer.Character then
+        for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = 1 end end
+    end
+end
+
+-- 27. Visible
+RepoCommands["visible"] = function()
+    if LocalPlayer.Character then
+        for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if (v:IsA("BasePart") and v.Name ~= "HumanoidRootPart") or v:IsA("Decal") then v.Transparency = 0 end end
+    end
+end
+
+-- 28. Naked (Remove Clothing Layouts)
+RepoCommands["naked"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do
+        if p.Character then
+            for _, v in pairs(p.Character:GetChildren()) do if v:IsA("Clothing") or v:IsA("ShirtGraphic") then v:Destroy() end end
+        end
+    end
+end
+
+-- 29. Blockhead (Remove Accessories)
+RepoCommands["blockhead"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do
+        if p.Character then for _, v in pairs(p.Character:GetChildren()) do if v:IsA("Accessory") then v:Destroy() end end end
+    end
+end
+
+-- 30. Teleport Hitbox (Expand Torso)
+RepoCommands["hitboxtorso"] = function(args)
+    local size = tonumber(args[2]) or 5
+    for _, p in pairs(GetPlayer(args[1] or "others")) do
+        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            p.Character.HumanoidRootPart.Size = Vector3.new(size, size, size)
+            p.Character.HumanoidRootPart.CanCollide = false
+            p.Character.HumanoidRootPart.Transparency = 0.5
+        end
+    end
+end
+
+-- 31. View Camera
+RepoCommands["view"] = function(args)
+    local targets = GetPlayer(args[1])
+    if #targets > 0 and targets[1].Character and targets[1].Character:FindFirstChildOfClass("Humanoid") then
+        Workspace.CurrentCamera.CameraSubject = targets[1].Character:FindFirstChildOfClass("Humanoid")
+    end
+end
+
+-- 32. Unview Camera
+RepoCommands["unview"] = function()
+    local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if hum then Workspace.CurrentCamera.CameraSubject = hum end
+end
+
+-- 33. Float
+RepoCommands["float"] = function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local float = Instance.new("BodyPosition", LocalPlayer.Character.HumanoidRootPart)
+        float.Name = "VortexFloat"
+        float.MaxForce = Vector3.new(0, math.huge, 0)
+        float.Position = LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+    end
+end
+
+-- 34. Unfloat
+RepoCommands["unfloat"] = function()
+    if LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart:FindFirstChild("VortexFloat") then LocalPlayer.Character.HumanoidRootPart.VortexFloat:Destroy() end
+end
+
+-- 35. Respawn (Load Character Refresh)
+RepoCommands["respawn"] = function() LocalPlayer:LoadCharacter() end
+
+-- 36. Blur Environment
+RepoCommands["blur"] = function(args)
+    local b = Instance.new("BlurEffect", Lighting)
+    b.Name = "VortexBlur"
+    b.Size = tonumber(args[1]) or 24
+end
+
+-- 37. Unblur
+RepoCommands["unblur"] = function() if Lighting:FindFirstChild("VortexBlur") then Lighting.VortexBlur:Destroy() end end
+
+-- 38. FOV Override
+RepoCommands["fov"] = function(args) Workspace.CurrentCamera.FieldOfView = tonumber(args[1]) or 70 end
+
+-- 39. Xray
+RepoCommands["xray"] = function()
+    for _, v in pairs(Workspace:GetDescendants()) do if v:IsA("BasePart") and not v:IsDescendantOf(LocalPlayer.Character) then v.Transparency = 0.5 end end
+end
+
+-- 40. Unxray
+RepoCommands["unxray"] = function()
+    for _, v in pairs(Workspace:GetDescendants()) do if v:IsA("BasePart") and not v:IsDescendantOf(LocalPlayer.Character) then v.Transparency = 0 end end
+end
+
+-- 41. Fire Resistance Model Overwrite
+RepoCommands["burn"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChild("Head") then Instance.new("Fire", p.Character.Head) end end
+end
+
+-- 42. Unburn
+RepoCommands["unburn"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do
+        if p.Character then for _, v in pairs(p.Character:GetDescendants()) do if v:IsA("Fire") then v:Destroy() end end end
+    end
+end
+
+-- 43. Sparkles Effects
+RepoCommands["sparkles"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then Instance.new("Sparkles", p.Character.HumanoidRootPart) end end
+end
+
+-- 44. Unsparkles
+RepoCommands["unsparkles"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do
+        if p.Character then for _, v in pairs(p.Character:GetDescendants()) do if v:IsA("Sparkles") then v:Destroy() end end end
+    end
+end
+
+-- 45. Delete Tools Inventory
+RepoCommands["clearbackpack"] = function(args)
+    for _, p in pairs(GetPlayer(args[1])) do if p:FindFirstChild("Backpack") then p.Backpack:ClearAllChildren() end end
+end
+
+-- 46. LoopSit
+RepoCommands["loopsit"] = function(args)
+    _G.LoopSitActive = true
+    task.spawn(function()
+        while _G.LoopSitActive and task.wait(0.2) do
+            for _, p in pairs(GetPlayer(args[1])) do if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then p.Character:FindFirstChildOfClass("Humanoid").Sit = true end end
+        end
+    end)
+end
+
+-- 47. Unloopsit
+RepoCommands["unloopsit"] = function() _G.LoopSitActive = false end
+
+-- 48. BTools (Client Side Building Tools Hoppers)
+RepoCommands["btools"] = function()
+    for i = 1, 4 do
+        local tool = Instance.new("Tool")
+        tool.BinType = i
+        tool.Parent = LocalPlayer.Backpack
+    end
+end
+
+-- 49. Baseplate Creation Vector Fix
+RepoCommands["baseplate"] = function()
+    local b = Instance.new("Part", Workspace)
+    b.Size = Vector3.new(1000, 2, 1000)
+    b.CFrame = CFrame.new(0, -2, 0)
+    b.Anchored = true
+    b.Material = Enum.Material.SmoothPlastic
+    b.BrickColor = BrickColor.new("Dark green")
+end
+
+-- 50. Crash Client (Local Soft Kick Simulation)
+RepoCommands["exit"] = function() LocalPlayer:Kick("Vortex Core System Shutdown Successfully.") end
+
+return RepoCommands
 
